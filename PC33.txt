@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+// Provider class
+class StringListProvider with ChangeNotifier {
+  List<String> _items = [];
+
+  List<String> get items => _items;
+
+  void addItem(String newItem) {
+    _items.add(newItem);
+    notifyListeners(); // Notify listeners to update UI
+  }
+}
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => StringListProvider(),
+      child: MaterialApp(home: StringListApp()),
+    ),
+  );
+}
+
+class StringListApp extends StatefulWidget {
+  @override
+  _StringListAppState createState() => _StringListAppState();
+}
+
+class _StringListAppState extends State<StringListApp> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    final stringProvider = Provider.of<StringListProvider>(context, listen: false);
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Provider String List Example")),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            // Input field and add button
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      labelText: "Enter a string",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_controller.text.isNotEmpty) {
+                      stringProvider.addItem(_controller.text);
+                      _controller.clear();
+                    }
+                  },
+                  child: Text("Add"),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+
+            // Display the list
+            Expanded(
+              child: Consumer<StringListProvider>(
+                builder: (context, provider, child) {
+                  return ListView.builder(
+                    itemCount: provider.items.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: CircleAvatar(child: Text("${index + 1}")),
+                        title: Text(provider.items[index]),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
